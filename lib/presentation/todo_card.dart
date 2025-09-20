@@ -130,8 +130,6 @@ class _TodoCardState extends ConsumerState<TodoCard> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isExpandable =
-        widget.childTodos != null && widget.childTodos!.isNotEmpty;
     final completeBefore = widget.todo.completeBefore;
 
     return TapRegion(
@@ -155,12 +153,10 @@ class _TodoCardState extends ConsumerState<TodoCard> {
                 title: widget.todo.title,
                 subtitle: widget.todo.description,
                 isSelected: isDeleting,
-                onTap: isExpandable
-                    ? () => setState(() {
-                          isOpen = !isOpen;
-                          isDeleting = false;
-                        })
-                    : null,
+                onTap: () => setState(() {
+                  isOpen = !isOpen;
+                  isDeleting = false;
+                }),
                 trailing: isDeleting
                     ? IconButton(
                         onPressed: () async {
