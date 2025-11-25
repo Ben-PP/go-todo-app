@@ -1,0 +1,18 @@
+variables:
+output: dist/
+releases:
+  - name: prod
+    jobs:
+      # Build APK
+      - name: release-android-prod
+        package:
+          platform: android
+          target: apk
+          build_args:
+            target-platform: android-arm,android-arm64
+
+      # Build DEB for Linux
+      - name: release-linux-prod
+        package:
+          platform: linux
+          target: deb

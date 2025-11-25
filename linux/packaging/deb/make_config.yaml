@@ -1,0 +1,31 @@
+display_name: Go-Todo
+package_name: gotodo
+maintainer:
+  name: Ben-PP
+  email: gotodo.scrubber628@passmail.net
+priority: optional
+section: x11
+installed_size: 2000
+essential: false
+#icon: assets/logo.png
+
+postinstall_scripts:
+  - echo "Installed Go-Todo successfully!"
+postuninstall_scripts:
+  - echo "Uninstalled Go-Todo successfully!"
+
+keywords:
+  - Todo
+  - Application
+  - Productivity
+
+generic_name: Todo Application
+
+categories:
+  - Office
+  - Utility
+
+startup_notify: true
+# You can also specify [metainfo](https://freedesktop.org/software/appstream/docs/chap-Quickstart.html) file
+# which contains metadata of the app.
+# metainfo: linux/packaging/myappid.appdata.xml
