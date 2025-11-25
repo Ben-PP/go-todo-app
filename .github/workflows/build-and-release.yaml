@@ -24,7 +24,9 @@ jobs:
           flutter-version-file: pubspec.yaml
           channel: 'main'
       - name: Install Fastforge
-        run: dart pub global activate fastforge 0.6.0
+        run: dart pub global activate fastforge 0.6.6
+      - name: Install build dependencties
+        run: sudo apt-get install clang cmake git ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev
       - name: Package
         run: fastforge release --name prod
       - name: Release
