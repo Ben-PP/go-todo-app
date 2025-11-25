@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       tag: ${{ github.ref_name }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -31,7 +32,7 @@ jobs:
       - name: Release
         run: |
           execFile=$(find . -type f -name 'go_todo*.deb' -o -name 'go_todo*.apk')
-          echo ${{ secrets.GITHUB_TOKEN }} | gh auth login --with-token
+          echo ${{ github.token }}
           gh release create $tag \
             --repo="$GITHUB_REPOSITORY" \
             --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
