@@ -7,7 +7,7 @@ priority: optional
 section: x11
 installed_size: 2000
 essential: false
-#icon: assets/logo.png
+icon: assets/icon/gotodo_icon3_512.png
 
 postinstall_scripts:
   - echo "Installed Go-Todo successfully!"
