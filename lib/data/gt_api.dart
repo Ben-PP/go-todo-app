@@ -405,7 +405,7 @@ class GtApi {
       }
 
       var data = jsonDecode(response.body);
-      var todoLists = (data['lists'] as List<dynamic>)
+      var todoLists = (data as List<dynamic>)
           .map((list) => TodoList.fromJson(list as Map<String, dynamic>))
           .toList();
       return todoLists;
@@ -460,7 +460,7 @@ class GtApi {
       }
 
       var data = jsonDecode(response.body);
-      return TodoList.fromJson(data['list'] as Map<String, dynamic>);
+      return TodoList.fromJson(data as Map<String, dynamic>);
     } on GtApiException catch (error) {
       return Future.error(error);
     } on SocketException catch (error) {
@@ -534,7 +534,7 @@ class GtApi {
       }
 
       var data = jsonDecode(response.body);
-      return Todo.fromJson(data['todo'] as Map<String, dynamic>);
+      return Todo.fromJson(data as Map<String, dynamic>);
     } on GtApiException catch (error) {
       return Future.error(error);
     } on SocketException catch (error) {
@@ -582,7 +582,7 @@ class GtApi {
       }
 
       var data = jsonDecode(response.body);
-      return Todo.fromJson(data['todo'] as Map<String, dynamic>);
+      return Todo.fromJson(data as Map<String, dynamic>);
     } on GtApiException catch (error) {
       return Future.error(error);
     } on SocketException catch (error) {
