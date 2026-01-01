@@ -1,4 +1,4 @@
-package com.bendevs.go_todo
+package com.bendevs.gotodo
 
 import io.flutter.embedding.android.FlutterActivity
 
