@@ -209,7 +209,7 @@ class _TodoListsViewState extends ConsumerState<TodoListsView> {
                               );
                             }
                           },
-                          isSelected: selectedList!.id == list.id && isDesktop,
+                          isSelected: isDesktop && selectedList?.id == list.id,
                         ),
                       ),
                       GtCardButton(
