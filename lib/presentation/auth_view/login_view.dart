@@ -19,6 +19,7 @@ class LoginView extends ConsumerStatefulWidget {
 }
 
 class _LoginViewState extends ConsumerState<LoginView> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
 
@@ -30,9 +31,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
     if (passwd.isEmpty || uname.isEmpty) {
       final snackBar = getSnackBar(
         context: context,
-        content: Text(
-          'Empty ${uname.isEmpty ? 'username' : 'password'}!',
-        ),
+        content: Text('Empty ${uname.isEmpty ? 'username' : 'password'}!'),
         isError: true,
       );
       ScaffoldMessenger.of(context).clearSnackBars();
@@ -55,17 +54,21 @@ class _LoginViewState extends ConsumerState<LoginView> {
       }
     } on GtApiException catch (error) {
       if (context.mounted) {
-        showErrorSnack(context, error, map: {
-          GtApiExceptionType.malformedBody:
-              'Login requests body was malformed.',
-          GtApiExceptionType.unauthorized: "Username/Password doesn't match.",
-          GtApiExceptionType.serverError:
-              'You broke the server (500) :(\nContact your personal support guy.',
-          GtApiExceptionType.unknownResponse:
-              'Something mysterious was handled incorrectly...',
-          GtApiExceptionType.hostNotResponding:
-              'Your server is not talking to us.',
-        });
+        showErrorSnack(
+          context,
+          error,
+          map: {
+            GtApiExceptionType.malformedBody:
+                'Login requests body was malformed.',
+            GtApiExceptionType.unauthorized: "Username/Password doesn't match.",
+            GtApiExceptionType.serverError:
+                'You broke the server (500) :(\nContact your personal support guy.',
+            GtApiExceptionType.unknownResponse:
+                'Something mysterious was handled incorrectly...',
+            GtApiExceptionType.hostNotResponding:
+                'Your server is not talking to us.',
+          },
+        );
       }
     } catch (error) {
       if (context.mounted) {
@@ -74,7 +77,8 @@ class _LoginViewState extends ConsumerState<LoginView> {
           getSnackBar(
             context: context,
             content: const Text(
-                'This error was not handled at all. Fix the thrash...'),
+              'This error was not handled at all. Fix the thrash...',
+            ),
             isError: true,
           ),
         );
@@ -96,67 +100,68 @@ class _LoginViewState extends ConsumerState<LoginView> {
   @override
   Widget build(BuildContext context) {
     return GtSmallWidthContainer(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text(
-            'Login',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: GtTextField(
-              controller: usernameController,
-              textInputAction: TextInputAction.next,
-              filled: true,
-              label: 'Username',
-              hint: 'Paroni, Julma-Hurtta, Liisa...',
-              leading: const Icon(Icons.person),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10.0),
-            child: GtTextField(
-              controller: passwordController,
-              textInputAction: TextInputAction.done,
-              filled: true,
-              label: 'Password',
-              isSecret: true,
-              leading: const Icon(Icons.password),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 10.0),
-            child: SizedBox(
-              width: double.infinity,
-              child: GtLoadingButton(
-                isLoading: isLoading,
-                onPressed: () async => await login(context),
-                text: 'Login',
+      child: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text('Login', style: Theme.of(context).textTheme.headlineMedium),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: GtTextField(
+                controller: usernameController,
+                autofocus: true,
+                textInputAction: TextInputAction.next,
+                filled: true,
+                label: 'Username',
+                hint: 'Paroni, Julma-Hurtta, Liisa...',
+                leading: const Icon(Icons.person),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text("Don't have an account?"),
-                const SizedBox(
-                  width: 2,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: GtTextField(
+                controller: passwordController,
+                textInputAction: TextInputAction.done,
+                filled: true,
+                label: 'Password',
+                isSecret: true,
+                leading: const Icon(Icons.password),
+                onFieldSubmitted: (_) async => await login(context),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 10.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: GtLoadingButton(
+                  isLoading: isLoading,
+                  onPressed: () async => await login(context),
+                  text: 'Login',
                 ),
-                TextButton(
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Don't have an account?"),
+                  const SizedBox(width: 2),
+                  TextButton(
                     onPressed: () {
                       Navigator.push(
                         context,
                         createGtRoute(context, const RegisterRoute()),
                       );
                     },
-                    child: const Text('Register')),
-              ],
+                    child: const Text('Register'),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
