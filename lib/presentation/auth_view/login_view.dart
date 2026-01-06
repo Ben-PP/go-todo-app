@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/authentication_provider.dart';
@@ -38,6 +39,8 @@ class _LoginViewState extends ConsumerState<LoginView> {
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       return;
     }
+    TextInput.finishAutofillContext();
+
     setState(() {
       isLoading = true;
     });
@@ -102,71 +105,76 @@ class _LoginViewState extends ConsumerState<LoginView> {
     return GtSmallWidthContainer(
       child: Form(
         key: _formKey,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text('Login', style: Theme.of(context).textTheme.headlineMedium),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: GtTextField(
-                controller: usernameController,
-                autofocus: true,
-                textInputAction: TextInputAction.next,
-                filled: true,
-                label: 'Username',
-                hint: 'Paroni, Julma-Hurtta, Liisa...',
-                leading: const Icon(Icons.person),
-                autovalidateMode: AutovalidateMode.onUnfocus,
-                validator:
-                    (input) =>
-                        input == null || input.trim().isEmpty
-                            ? 'Username cannot be empty'
-                            : null,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: GtTextField(
-                controller: passwordController,
-                textInputAction: TextInputAction.done,
-                filled: true,
-                label: 'Password',
-                isSecret: true,
-                leading: const Icon(Icons.password),
-                onFieldSubmitted: (_) async => await login(context),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 10.0),
-              child: SizedBox(
-                width: double.infinity,
-                child: GtLoadingButton(
-                  isLoading: isLoading,
-                  onPressed: () async => await login(context),
-                  text: 'Login',
+        child: AutofillGroup(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text('Login', style: Theme.of(context).textTheme.headlineMedium),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: GtTextField(
+                  controller: usernameController,
+                  autofocus: true,
+                  textInputAction: TextInputAction.next,
+                  filled: true,
+                  label: 'Username',
+                  hint: 'Paroni, Julma-Hurtta, Liisa...',
+                  leading: const Icon(Icons.person),
+                  autofillHints: [AutofillHints.username],
+                  autovalidateMode: AutovalidateMode.onUnfocus,
+                  validator:
+                      (input) =>
+                          input == null || input.trim().isEmpty
+                              ? 'Username cannot be empty'
+                              : null,
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("Don't have an account?"),
-                  const SizedBox(width: 2),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        createGtRoute(context, const RegisterRoute()),
-                      );
-                    },
-                    child: const Text('Register'),
-                  ),
-                ],
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10.0),
+                child: GtTextField(
+                  controller: passwordController,
+                  textInputAction: TextInputAction.done,
+                  keyboardType: TextInputType.visiblePassword,
+                  filled: true,
+                  label: 'Password',
+                  isSecret: true,
+                  leading: const Icon(Icons.password),
+                  autofillHints: [AutofillHints.password],
+                  onFieldSubmitted: (_) async => await login(context),
+                ),
               ),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.only(top: 10.0),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: GtLoadingButton(
+                    isLoading: isLoading,
+                    onPressed: () async => await login(context),
+                    text: 'Login',
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Don't have an account?"),
+                    const SizedBox(width: 2),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          createGtRoute(context, const RegisterRoute()),
+                        );
+                      },
+                      child: const Text('Register'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

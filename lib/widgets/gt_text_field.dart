@@ -19,6 +19,7 @@ class GtTextField extends StatefulWidget {
     this.validator,
     this.textInputAction,
     this.maxLength,
+    this.autofillHints,
   });
   final TextEditingController controller;
   final ValueChanged<String>? onChanged;
@@ -36,6 +37,7 @@ class GtTextField extends StatefulWidget {
   final String? Function(String?)? validator;
   final TextInputAction? textInputAction;
   final int? maxLength;
+  final Iterable<String>? autofillHints;
 
   @override
   State<GtTextField> createState() => _GtTextFieldState();
@@ -99,6 +101,7 @@ class _GtTextFieldState extends State<GtTextField> {
       onChanged: widget.onChanged,
       keyboardType:
           widget.isSecret ? TextInputType.visiblePassword : widget.keyboardType,
+      autofillHints: widget.autofillHints,
     );
   }
 }
