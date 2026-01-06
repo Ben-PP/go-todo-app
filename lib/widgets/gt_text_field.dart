@@ -5,7 +5,10 @@ class GtTextField extends StatefulWidget {
     super.key,
     required this.controller,
     this.onChanged,
+    this.onFieldSubmitted,
+    this.autofocus = false,
     this.keyboardType = TextInputType.text,
+    this.textCapitalization = TextCapitalization.none,
     this.filled = false,
     this.label,
     this.hint,
@@ -16,10 +19,14 @@ class GtTextField extends StatefulWidget {
     this.validator,
     this.textInputAction,
     this.maxLength,
+    this.autofillHints,
   });
   final TextEditingController controller;
   final ValueChanged<String>? onChanged;
+  final void Function(String)? onFieldSubmitted;
+  final bool autofocus;
   final TextInputType keyboardType;
+  final TextCapitalization textCapitalization;
   final bool filled;
   final String? label;
   final String? hint;
@@ -30,6 +37,7 @@ class GtTextField extends StatefulWidget {
   final String? Function(String?)? validator;
   final TextInputAction? textInputAction;
   final int? maxLength;
+  final Iterable<String>? autofillHints;
 
   @override
   State<GtTextField> createState() => _GtTextFieldState();
@@ -50,11 +58,17 @@ class _GtTextFieldState extends State<GtTextField> {
     return TextFormField(
       maxLength: widget.maxLength,
       onTapOutside: (event) => FocusScope.of(context).unfocus(),
+      onFieldSubmitted: widget.onFieldSubmitted,
+      textCapitalization: widget.textCapitalization,
       autovalidateMode: widget.autovalidateMode,
       validator: widget.validator,
+      autofocus: widget.autofocus,
       controller: widget.controller,
       textInputAction: widget.textInputAction,
       decoration: InputDecoration(
+        errorBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.error),
+        ),
         border: !widget.filled ? const OutlineInputBorder() : null,
         filled: widget.filled,
         fillColor:
@@ -87,6 +101,7 @@ class _GtTextFieldState extends State<GtTextField> {
       onChanged: widget.onChanged,
       keyboardType:
           widget.isSecret ? TextInputType.visiblePassword : widget.keyboardType,
+      autofillHints: widget.autofillHints,
     );
   }
 }

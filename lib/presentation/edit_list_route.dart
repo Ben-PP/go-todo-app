@@ -151,16 +151,26 @@ class _EditListRouteState extends ConsumerState<EditListRoute> {
                     padding: const EdgeInsets.symmetric(vertical: 10.0),
                     child: GtTextField(
                       controller: titleController,
+                      textInputAction: TextInputAction.done,
+                      textCapitalization: TextCapitalization.sentences,
                       maxLength: 40,
                       hint: 'List name',
                       label: 'List name',
                       filled: true,
+                      autovalidateMode: AutovalidateMode.onUnfocus,
+                      validator:
+                          (input) =>
+                              input == null || input.trim().isEmpty
+                                  ? 'Title cannot be empty'
+                                  : null,
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10.0),
                     child: GtTextField(
                       controller: descriptionController,
+                      textInputAction: TextInputAction.done,
+                      textCapitalization: TextCapitalization.sentences,
                       maxLength: 150,
                       hint: 'List description',
                       label: 'List description',

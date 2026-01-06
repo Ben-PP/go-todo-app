@@ -20,6 +20,7 @@ class CreateTodoRoute extends ConsumerStatefulWidget {
 }
 
 class _CreateTodoRouteState extends ConsumerState<CreateTodoRoute> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
   DateTime? selectedDate;
@@ -34,9 +35,10 @@ class _CreateTodoRouteState extends ConsumerState<CreateTodoRoute> {
 
   void addTodo(BuildContext context) async {
     var title = titleController.text.trim();
-    String? description = descriptionController.text.trim().isNotEmpty
-        ? descriptionController.text.trim()
-        : null;
+    String? description =
+        descriptionController.text.trim().isNotEmpty
+            ? descriptionController.text.trim()
+            : null;
     if (titleController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         getSnackBar(
@@ -52,7 +54,9 @@ class _CreateTodoRouteState extends ConsumerState<CreateTodoRoute> {
     });
 
     try {
-      await ref.read(todoListProvider.notifier).createTodo(
+      await ref
+          .read(todoListProvider.notifier)
+          .createTodo(
             listId: widget.listId,
             title: title,
             description: description,
@@ -72,13 +76,17 @@ class _CreateTodoRouteState extends ConsumerState<CreateTodoRoute> {
       }
     } on GtApiException catch (error) {
       if (context.mounted) {
-        showErrorSnack(context, error, map: {
-          GtApiExceptionType.malformedBody: 'Your todo request is malformed.',
-          GtApiExceptionType.forbidden:
-              'You are not allowed to create todo for this list.',
-          GtApiExceptionType.unauthorized: 'You are not authorized...',
-          GtApiExceptionType.unknown: 'Failed to create todo.',
-        });
+        showErrorSnack(
+          context,
+          error,
+          map: {
+            GtApiExceptionType.malformedBody: 'Your todo request is malformed.',
+            GtApiExceptionType.forbidden:
+                'You are not allowed to create todo for this list.',
+            GtApiExceptionType.unauthorized: 'You are not authorized...',
+            GtApiExceptionType.unknown: 'Failed to create todo.',
+          },
+        );
       }
     } catch (error) {
       if (context.mounted) {
@@ -106,109 +114,125 @@ class _CreateTodoRouteState extends ConsumerState<CreateTodoRoute> {
       showDrawer: false,
       title: const Text('New TODO'),
       body: GtSmallWidthContainer(
-          child: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 20.0),
-              child: Text(
-                'Create a new TODO item',
-                style: Theme.of(context).textTheme.headlineSmall,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20.0),
+                child: Text(
+                  'Create a new TODO item',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
               ),
-            ),
-            Form(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: GtTextField(
-                      controller: titleController,
-                      filled: true,
-                      label: 'Title',
-                      hint: 'Title of the TODO',
-                      maxLength: 40,
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      child: GtTextField(
+                        controller: titleController,
+                        autofocus: true,
+                        textInputAction: TextInputAction.next,
+                        textCapitalization: TextCapitalization.sentences,
+                        filled: true,
+                        label: 'Title',
+                        hint: 'Title of the TODO',
+                        maxLength: 40,
+                        autovalidateMode: AutovalidateMode.onUnfocus,
+                        validator:
+                            (input) =>
+                                input == null || input.trim().isEmpty
+                                    ? 'Title cannot be empty'
+                                    : null,
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: GtTextField(
-                      controller: descriptionController,
-                      filled: true,
-                      label: 'Description',
-                      hint: 'Description of the TODO',
-                      maxLength: 150,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      child: GtTextField(
+                        controller: descriptionController,
+                        textInputAction: TextInputAction.next,
+                        textCapitalization: TextCapitalization.sentences,
+                        filled: true,
+                        label: 'Description',
+                        hint: 'Description of the TODO',
+                        maxLength: 150,
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: Row(
-                      children: [
-                        Text('Due date:', style: textTheme.labelLarge),
-                        const SizedBox(width: 20),
-                        Text(
-                          selectedDate != null
-                              ? '${selectedDate!.year}-${selectedDate!.month}-${selectedDate!.day}'
-                              : 'Not set',
-                          style: textTheme.labelLarge,
-                        ),
-                        const Spacer(),
-                        IconButton(
-                          onPressed: () async {
-                            var date = await showDatePicker(
-                              context: context,
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime.now().add(
-                                const Duration(days: 3650),
-                              ),
-                            );
-                            if (date != null) {
-                              setState(() {
-                                selectedDate = date;
-                              });
-                            }
-                          },
-                          icon: const Icon(Icons.edit),
-                        ),
-                        IconButton(
-                          onPressed: () => setState(() => selectedDate = null),
-                          icon: const Icon(Icons.clear),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10.0),
-                    child: Row(
-                      children: [
-                        Flexible(
-                          flex: 1,
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: GtLoadingButton(
-                                text: 'Cancel',
-                                onPressed: () => Navigator.of(context).pop()),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      child: Row(
+                        children: [
+                          Text('Due date:', style: textTheme.labelLarge),
+                          const SizedBox(width: 20),
+                          Text(
+                            selectedDate != null
+                                ? '${selectedDate!.year}-${selectedDate!.month}-${selectedDate!.day}'
+                                : 'Not set',
+                            style: textTheme.labelLarge,
                           ),
-                        ),
-                        const SizedBox(width: 20),
-                        Flexible(
-                          flex: 1,
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: GtLoadingButton(
+                          const Spacer(),
+                          IconButton(
+                            onPressed: () async {
+                              var date = await showDatePicker(
+                                context: context,
+                                firstDate: DateTime.now(),
+                                lastDate: DateTime.now().add(
+                                  const Duration(days: 3650),
+                                ),
+                              );
+                              if (date != null) {
+                                setState(() {
+                                  selectedDate = date;
+                                });
+                              }
+                            },
+                            icon: const Icon(Icons.edit),
+                          ),
+                          IconButton(
+                            onPressed:
+                                () => setState(() => selectedDate = null),
+                            icon: const Icon(Icons.clear),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10.0),
+                      child: Row(
+                        children: [
+                          Flexible(
+                            flex: 1,
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: GtLoadingButton(
+                                text: 'Cancel',
+                                onPressed: () => Navigator.of(context).pop(),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 20),
+                          Flexible(
+                            flex: 1,
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: GtLoadingButton(
                                 isLoading: isLoading,
                                 text: 'Add Todo',
-                                onPressed: () => addTodo(context)),
+                                onPressed: () => addTodo(context),
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  )
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      )),
+      ),
     );
   }
 }
