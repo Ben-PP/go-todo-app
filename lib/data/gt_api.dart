@@ -68,11 +68,11 @@ class GtApi {
   /// as a key and message as a value. If not provided, default messages are used.
   void _handleErrorStatus(http.Response response, {Map<int, String>? map}) {
     logError(GtApiException error, {Level level = Level.SEVERE}) => log(
-          error.cause,
-          error: error,
-          level: level.value,
-          stackTrace: StackTrace.current,
-        );
+      error.cause,
+      error: error,
+      level: level.value,
+      stackTrace: StackTrace.current,
+    );
     switch (response.statusCode) {
       case 400:
         final error = GtApiException(
@@ -125,10 +125,12 @@ class GtApi {
       cause: 'Unknown error happened while creating list.',
       type: GtApiExceptionType.unknown,
     );
-    log(gtError.cause,
-        error: error,
-        level: Level.SEVERE.value,
-        stackTrace: StackTrace.current);
+    log(
+      gtError.cause,
+      error: error,
+      level: Level.SEVERE.value,
+      stackTrace: StackTrace.current,
+    );
     return Future<T>.error(gtError);
   }
 
@@ -148,9 +150,10 @@ class GtApi {
 
   /// Set the base url for the applications backend calls
   Future<void> setBaseUrl(String url) async {
-    var fullUrl = url.endsWith('/')
-        ? url.substring(0, url.length - 1) + defaultPath
-        : url + defaultPath;
+    var fullUrl =
+        url.endsWith('/')
+            ? url.substring(0, url.length - 1) + defaultPath
+            : url + defaultPath;
     try {
       var response = await http.get(Uri.parse('$fullUrl/status'));
       if (response.statusCode != 200) {
@@ -185,7 +188,9 @@ class GtApi {
   Future<void> refresh() async {
     if (!_hasBaseUrl()) {
       final error = GtApiException(
-          cause: 'BaseUrl not set.', type: GtApiExceptionType.urlNull);
+        cause: 'BaseUrl not set.',
+        type: GtApiExceptionType.urlNull,
+      );
       log('App has no baseUrl', level: Level.SEVERE.value, error: error);
       throw error;
     }
@@ -257,10 +262,7 @@ class GtApi {
       var response = await http.post(
         Uri.parse('$baseUrl/auth/login'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'username': username,
-          'password': password,
-        }),
+        body: jsonEncode({'username': username, 'password': password}),
       );
 
       if (response.statusCode != 200) {
@@ -304,14 +306,14 @@ class GtApi {
     }
 
     try {
-      var response = await http.post(Uri.parse('$baseUrl/auth/logout'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $accessJWT'
-          },
-          body: jsonEncode({
-            'refresh_token': refreshJWT,
-          }));
+      var response = await http.post(
+        Uri.parse('$baseUrl/auth/logout'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessJWT',
+        },
+        body: jsonEncode({'refresh_token': refreshJWT}),
+      );
 
       if (response.statusCode != 204) {
         if (response.statusCode == 401) {
@@ -357,16 +359,14 @@ class GtApi {
       var response = await http.post(
         Uri.parse('$baseUrl/user/'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'username': username,
-          'password': password,
-        }),
+        body: jsonEncode({'username': username, 'password': password}),
       );
 
       if (response.statusCode != 201) {
-        _handleErrorStatus(response, map: {
-          409: 'User with username $username already exists.',
-        });
+        _handleErrorStatus(
+          response,
+          map: {409: 'User with username $username already exists.'},
+        );
       }
     } on GtApiException catch (_) {
       rethrow;
@@ -405,9 +405,10 @@ class GtApi {
       }
 
       var data = jsonDecode(response.body);
-      var todoLists = (data as List<dynamic>)
-          .map((list) => TodoList.fromJson(list as Map<String, dynamic>))
-          .toList();
+      var todoLists =
+          (data as List<dynamic>)
+              .map((list) => TodoList.fromJson(list as Map<String, dynamic>))
+              .toList();
       return todoLists;
     } on GtApiException catch (_) {
       rethrow;
@@ -423,16 +424,20 @@ class GtApi {
         cause: 'Unknown error happened while getting lists.',
         type: GtApiExceptionType.unknown,
       );
-      log(gtError.cause,
-          error: error,
-          level: Level.SEVERE.value,
-          stackTrace: StackTrace.current);
+      log(
+        gtError.cause,
+        error: error,
+        level: Level.SEVERE.value,
+        stackTrace: StackTrace.current,
+      );
       throw gtError;
     }
   }
 
-  Future<TodoList> createList(
-      {required String title, String? description}) async {
+  Future<TodoList> createList({
+    required String title,
+    String? description,
+  }) async {
     if (!_hasBaseUrl()) {
       final error = Exception('BaseUrl not set');
       log('App has no baseUrl', level: Level.SEVERE.value, error: error);
@@ -446,7 +451,7 @@ class GtApi {
         Uri.parse('$baseUrl/list/'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $accessJWT'
+          'Authorization': 'Bearer $accessJWT',
         },
         body: jsonEncode(reqBody),
       );
@@ -456,6 +461,46 @@ class GtApi {
       // 401 if accessJWT is invalid
       // 500 for multiple reasons
       if (response.statusCode != 201) {
+        _handleErrorStatus(response, map: {});
+      }
+
+      var data = jsonDecode(response.body);
+      return TodoList.fromJson(data as Map<String, dynamic>);
+    } on GtApiException catch (error) {
+      return Future.error(error);
+    } on SocketException catch (error) {
+      return _handleSocketException<TodoList>(error);
+    } catch (error) {
+      return _handleUnknownError<TodoList>(error);
+    }
+  }
+
+  Future<TodoList> updateList({
+    required String listId,
+    String? title,
+    String? description,
+  }) async {
+    if (!_hasBaseUrl()) {
+      final error = Exception('BaseUrl not set');
+      log('App has no baseUrl', level: Level.SEVERE.value, error: error);
+      throw error;
+    }
+
+    Map<String, dynamic> reqBody = {};
+    if (title != null) reqBody['title'] = title;
+    if (description != null) reqBody['description'] = description;
+
+    try {
+      var response = await http.patch(
+        Uri.parse('$baseUrl/list/$listId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessJWT',
+        },
+        body: jsonEncode(reqBody),
+      );
+
+      if (response.statusCode != 200) {
         _handleErrorStatus(response, map: {});
       }
 
@@ -524,7 +569,7 @@ class GtApi {
         Uri.parse('$baseUrl/list/$listId/todo/'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $accessJWT'
+          'Authorization': 'Bearer $accessJWT',
         },
         body: jsonEncode(reqBody),
       );
@@ -572,7 +617,7 @@ class GtApi {
         Uri.parse('$baseUrl/list/$listId/todo/$todoId'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $accessJWT'
+          'Authorization': 'Bearer $accessJWT',
         },
         body: jsonEncode(reqBody),
       );
@@ -607,7 +652,7 @@ class GtApi {
         Uri.parse('$baseUrl/list/$listId/todo/$todoId'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $accessJWT'
+          'Authorization': 'Bearer $accessJWT',
         },
       );
 

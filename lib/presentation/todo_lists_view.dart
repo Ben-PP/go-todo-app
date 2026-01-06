@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_todo/presentation/edit_list_route.dart';
 
 import '../application/todo_list.dart';
 import '../data/gt_api.dart';
@@ -27,31 +28,36 @@ class TodoListsView extends ConsumerStatefulWidget {
 
 class _TodoListsViewState extends ConsumerState<TodoListsView> {
   var isRefreshing = false;
-  String? selectedListId;
+  todo_list_domain.TodoList? selectedList;
 
   @override
   Widget build(BuildContext context) {
-    final AsyncValue<List<todo_list_domain.TodoList>> todoLists =
-        ref.watch(todoListProvider);
+    final AsyncValue<List<todo_list_domain.TodoList>> todoLists = ref.watch(
+      todoListProvider,
+    );
     final colorScheme = Theme.of(context).colorScheme;
     final isDesktop = MediaQuery.sizeOf(context).width > ScreenSize.large.value;
     Widget content = const GtLoadingPage();
 
-    List<Widget> getListActions(String todoListId) {
+    List<Widget> getListActions(todo_list_domain.TodoList todoList) {
       return [
         IconButton(
           onPressed: () {
-            Navigator.of(context).push(createGtRoute(
-              context,
-              CreateTodoRoute(listId: todoListId),
-              emergeVertically: true,
-            ));
+            Navigator.of(context).push(
+              createGtRoute(
+                context,
+                CreateTodoRoute(listId: todoList.id),
+                emergeVertically: true,
+              ),
+            );
           },
           icon: const Icon(Icons.add),
         ),
-        MenuAnchor(
-          builder: (context, controller, child) {
-            return IconButton(
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: MenuAnchor(
+            builder: (context, controller, child) {
+              return IconButton(
                 onPressed: () {
                   if (controller.isOpen) {
                     controller.close();
@@ -59,78 +65,94 @@ class _TodoListsViewState extends ConsumerState<TodoListsView> {
                     controller.open();
                   }
                 },
-                icon: const Icon(Icons.more_vert));
-          },
-          menuChildren: [
-            MenuItemButton(
-              onPressed: () {
-                // Handle edit action
-              },
-              child: const Text('Edit'),
-            ),
-            // Delete action
-            MenuItemButton(
-              onPressed: () async {
-                bool success = await showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: const Text('Delete List'),
-                          content: const Text(
-                              'Are you sure you want to delete this list?'),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(false),
-                              child: const Text('Cancel'),
+                icon: const Icon(Icons.more_vert),
+              );
+            },
+            menuChildren: [
+              MenuItemButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    createGtRoute(
+                      context,
+                      EditListRoute(todoList: todoList),
+                      emergeVertically: true,
+                    ),
+                  );
+                },
+                child: const Text('Edit details'),
+              ),
+              // Delete action
+              MenuItemButton(
+                onPressed: () async {
+                  bool success =
+                      await showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text('Delete List'),
+                            content: const Text(
+                              'Are you sure you want to delete this list?',
                             ),
-                            TextButton(
-                              onPressed: () async {
-                                try {
-                                  await ref
-                                      .read(todoListProvider.notifier)
-                                      .deleteList(todoListId);
-                                  if (context.mounted) {
-                                    final snackBar = getSnackBar(
-                                      context: context,
-                                      content: const Text('List deleted.'),
-                                    );
-                                    ScaffoldMessenger.of(context)
-                                        .clearSnackBars();
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(snackBar);
-                                    Navigator.of(context).pop(true);
+                            actions: [
+                              TextButton(
+                                onPressed:
+                                    () => Navigator.of(context).pop(false),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () async {
+                                  try {
+                                    await ref
+                                        .read(todoListProvider.notifier)
+                                        .deleteList(todoList.id);
+                                    if (context.mounted) {
+                                      final snackBar = getSnackBar(
+                                        context: context,
+                                        content: const Text('List deleted.'),
+                                      );
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).clearSnackBars();
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(snackBar);
+                                      Navigator.of(context).pop(true);
+                                    }
+                                  } on GtApiException catch (_) {
+                                    if (context.mounted) {
+                                      final snackBar = getSnackBar(
+                                        context: context,
+                                        content: const Text(
+                                          'Failed to delete list',
+                                        ),
+                                        isError: true,
+                                      );
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).clearSnackBars();
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(snackBar);
+                                    }
                                   }
-                                } on GtApiException catch (_) {
-                                  if (context.mounted) {
-                                    final snackBar = getSnackBar(
-                                      context: context,
-                                      content:
-                                          const Text('Failed to delete list'),
-                                      isError: true,
-                                    );
-                                    ScaffoldMessenger.of(context)
-                                        .clearSnackBars();
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(snackBar);
-                                  }
-                                }
-                              },
-                              child: const Text('Delete'),
-                            ),
-                          ],
-                        );
-                      },
-                    ) ??
-                    false;
-                if (success && isDesktop) {
-                  selectedListId = null; // Reset selected list on delete
-                } else if (success && context.mounted) {
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Text('Delete'),
-            ),
-          ],
+                                },
+                                child: const Text('Delete'),
+                              ),
+                            ],
+                          );
+                        },
+                      ) ??
+                      false;
+                  if (success && isDesktop) {
+                    selectedList = null; // Reset selected list on delete
+                  } else if (success && context.mounted) {
+                    Navigator.of(context).pop();
+                  }
+                },
+                child: const Text('Delete'),
+              ),
+            ],
+          ),
         ),
       ];
     }
@@ -146,14 +168,15 @@ class _TodoListsViewState extends ConsumerState<TodoListsView> {
       case AsyncData(:final value):
         if (isDesktop) {
           setState(() {
-            selectedListId ??= value.isNotEmpty ? value.first.id : null;
+            selectedList ??= value.isNotEmpty ? value.first : null;
           });
         }
         content = Center(
           child: SizedBox(
-            width: MediaQuery.sizeOf(context).width > ScreenSize.large.value
-                ? ScreenSize.large.value.toDouble()
-                : double.infinity,
+            width:
+                MediaQuery.sizeOf(context).width > ScreenSize.large.value
+                    ? ScreenSize.large.value.toDouble()
+                    : double.infinity,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,26 +188,33 @@ class _TodoListsViewState extends ConsumerState<TodoListsView> {
                     title: isDesktop ? 'Todo Lists' : null,
                     subtitle: isDesktop ? 'Select a list to view' : null,
                     children: [
-                      ...value.map((list) => TodoListCard(
-                            list: list,
-                            onTap: () {
-                              if (isDesktop) {
-                                setState(() {
-                                  selectedListId = list.id;
-                                });
-                              } else {
-                                Navigator.of(context).push(createGtRoute(
+                      ...value.map(
+                        (list) => TodoListCard(
+                          list: list,
+                          onTap: () {
+                            if (isDesktop) {
+                              setState(() {
+                                selectedList = list;
+                              });
+                            } else {
+                              Navigator.of(context).push(
+                                createGtRoute(
                                   context,
                                   TodoListRoute(
                                     todoListId: list.id,
-                                    actions: getListActions(list.id),
+                                    actions: getListActions(list),
                                   ),
                                   emergeVertically: true,
-                                ));
-                              }
-                            },
-                            isSelected: selectedListId == list.id && isDesktop,
-                          )),
+                                ),
+                              );
+                            }
+                          },
+                          isSelected:
+                              (selectedList == null ||
+                                  selectedList!.id == list.id) &&
+                              isDesktop,
+                        ),
+                      ),
                       GtCardButton(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -201,11 +231,13 @@ class _TodoListsViewState extends ConsumerState<TodoListsView> {
                           ],
                         ),
                         onTap: () {
-                          Navigator.of(context).push(createGtRoute(
-                            context,
-                            const CreateListRoute(),
-                            emergeVertically: true,
-                          ));
+                          Navigator.of(context).push(
+                            createGtRoute(
+                              context,
+                              const CreateListRoute(),
+                              emergeVertically: true,
+                            ),
+                          );
                         },
                       ),
                     ],
@@ -220,33 +252,39 @@ class _TodoListsViewState extends ConsumerState<TodoListsView> {
                 if (isDesktop)
                   Flexible(
                     flex: 8,
-                    child: value.isNotEmpty
-                        ? TodoView(
-                            actions: selectedListId != null
-                                ? getListActions(selectedListId ?? '')
-                                : null,
-                            todoList: value.firstWhere((l) {
-                              if (selectedListId != null) {
-                                return l.id == selectedListId;
-                              }
-                              return l.todos.isNotEmpty;
-                            }),
-                            afterDelete: () {
-                              setState(() {
-                                selectedListId = null;
-                              });
-                            },
-                          )
-                        : SizedBox(
-                            width: double.infinity,
-                            child: Center(
-                              child: Text(
-                                'No todo lists available.',
-                                style:
-                                    Theme.of(context).textTheme.headlineSmall,
+                    child:
+                        value.isNotEmpty
+                            ? TodoView(
+                              actions:
+                                  selectedList != null
+                                      ? getListActions(
+                                        value.firstWhere(
+                                          (l) => l.id == selectedList!.id,
+                                        ),
+                                      )
+                                      : null,
+                              todoList: value.firstWhere((l) {
+                                if (selectedList != null) {
+                                  return l.id == selectedList!.id;
+                                }
+                                return l.todos.isNotEmpty;
+                              }),
+                              afterDelete: () {
+                                setState(() {
+                                  selectedList = null;
+                                });
+                              },
+                            )
+                            : SizedBox(
+                              width: double.infinity,
+                              child: Center(
+                                child: Text(
+                                  'No todo lists available.',
+                                  style:
+                                      Theme.of(context).textTheme.headlineSmall,
+                                ),
                               ),
                             ),
-                          ),
                   ),
               ],
             ),
@@ -267,10 +305,11 @@ class _TodoListsViewState extends ConsumerState<TodoListsView> {
                 ),
               ),
               GtLoadingButton(
-                  text: 'Try Again',
-                  onPressed: () {
-                    var _ = ref.refresh(todoListProvider);
-                  }),
+                text: 'Try Again',
+                onPressed: () {
+                  var _ = ref.refresh(todoListProvider);
+                },
+              ),
             ],
           ),
         );

@@ -14,15 +14,33 @@ class TodoList extends _$TodoList {
     return todoLists;
   }
 
-  Future<void> createList({
-    required String title,
-    String? description,
-  }) async {
+  Future<void> createList({required String title, String? description}) async {
     final newList = await GtApi().createList(
       title: title,
       description: description,
     );
     state = AsyncData([...state.value ?? [], newList]);
+  }
+
+  Future<void> updateList({
+    required String listId,
+    String? title,
+    String? description,
+  }) async {
+    final updatedList = await GtApi().updateList(
+      listId: listId,
+      title: title,
+      description: description,
+    );
+    final updatedLists =
+        state.value?.map((list) {
+          if (list.id == listId) {
+            final resultList = updatedList.copyWith(todos: list.todos);
+            return resultList;
+          }
+          return list;
+        }).toList();
+    state = AsyncData(updatedLists ?? []);
   }
 
   Future<void> deleteList(String listId) async {
@@ -46,12 +64,13 @@ class TodoList extends _$TodoList {
       completeBefore: completeBefore,
       parentId: parentId,
     );
-    final updatedLists = state.value?.map((list) {
-      if (list.id == listId) {
-        return list.copyWith(todos: [...list.todos, newTodo]);
-      }
-      return list;
-    }).toList();
+    final updatedLists =
+        state.value?.map((list) {
+          if (list.id == listId) {
+            return list.copyWith(todos: [...list.todos, newTodo]);
+          }
+          return list;
+        }).toList();
     state = AsyncData(updatedLists ?? []);
   }
 
@@ -71,29 +90,32 @@ class TodoList extends _$TodoList {
       completeBefore: completeBefore,
       isCompleted: isCompleted,
     );
-    final updatedLists = state.value?.map((list) {
-      if (list.id == listId) {
-        return list.copyWith(
-          todos: list.todos.map((todo) {
-            return todo.id == todoId ? updatedTodo : todo;
-          }).toList(),
-        );
-      }
-      return list;
-    }).toList();
+    final updatedLists =
+        state.value?.map((list) {
+          if (list.id == listId) {
+            return list.copyWith(
+              todos:
+                  list.todos.map((todo) {
+                    return todo.id == todoId ? updatedTodo : todo;
+                  }).toList(),
+            );
+          }
+          return list;
+        }).toList();
     state = AsyncData(updatedLists ?? []);
   }
 
   Future<void> deleteTodo(String listId, String todoId) async {
     await GtApi().deleteTodo(listId: listId, todoId: todoId);
-    final updatedLists = state.value?.map((list) {
-      if (list.id == listId) {
-        return list.copyWith(
-          todos: list.todos.where((todo) => todo.id != todoId).toList(),
-        );
-      }
-      return list;
-    }).toList();
+    final updatedLists =
+        state.value?.map((list) {
+          if (list.id == listId) {
+            return list.copyWith(
+              todos: list.todos.where((todo) => todo.id != todoId).toList(),
+            );
+          }
+          return list;
+        }).toList();
     state = AsyncData(updatedLists ?? []);
   }
 }
