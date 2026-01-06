@@ -5,6 +5,8 @@ class GtTextField extends StatefulWidget {
     super.key,
     required this.controller,
     this.onChanged,
+    this.onFieldSubmitted,
+    this.autofocus = false,
     this.keyboardType = TextInputType.text,
     this.filled = false,
     this.label,
@@ -19,6 +21,8 @@ class GtTextField extends StatefulWidget {
   });
   final TextEditingController controller;
   final ValueChanged<String>? onChanged;
+  final void Function(String)? onFieldSubmitted;
+  final bool autofocus;
   final TextInputType keyboardType;
   final bool filled;
   final String? label;
@@ -50,8 +54,10 @@ class _GtTextFieldState extends State<GtTextField> {
     return TextFormField(
       maxLength: widget.maxLength,
       onTapOutside: (event) => FocusScope.of(context).unfocus(),
+      onFieldSubmitted: widget.onFieldSubmitted,
       autovalidateMode: widget.autovalidateMode,
       validator: widget.validator,
+      autofocus: widget.autofocus,
       controller: widget.controller,
       textInputAction: widget.textInputAction,
       decoration: InputDecoration(
