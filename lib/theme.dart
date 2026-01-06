@@ -52,7 +52,9 @@ final themeData = ThemeData(
     ),
     menuTheme: MenuThemeData(
       style: MenuStyle(
-        backgroundColor: WidgetStateProperty.all(Colors.cyan.shade900),
+        backgroundColor: WidgetStateProperty.all(Colors.grey[850]),
+        shadowColor: WidgetStatePropertyAll(Colors.black),
+        elevation: WidgetStateProperty.all(8),
         shape: WidgetStateProperty.all(
           RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
         ),
@@ -60,8 +62,9 @@ final themeData = ThemeData(
     ),
     menuButtonTheme: MenuButtonThemeData(
       style: ButtonStyle(
-        backgroundColor: WidgetStateProperty.all(Colors.cyan.shade900),
+        //backgroundColor: WidgetStateProperty.all(Colors.cyan.shade900),
         foregroundColor: WidgetStateProperty.all(Colors.white70),
+        minimumSize: WidgetStatePropertyAll(const Size(120, 50)),
         padding: WidgetStateProperty.all(
             const EdgeInsets.symmetric(horizontal: 16, vertical: 12)),
         shape: WidgetStateProperty.all(

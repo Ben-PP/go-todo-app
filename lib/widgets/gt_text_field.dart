@@ -57,25 +57,28 @@ class _GtTextFieldState extends State<GtTextField> {
       decoration: InputDecoration(
         border: !widget.filled ? const OutlineInputBorder() : null,
         filled: widget.filled,
-        fillColor: widget.filled
-            ? Theme.of(context).colorScheme.primaryContainer
-            : null,
+        fillColor:
+            widget.filled
+                ? Theme.of(context).colorScheme.primaryContainer
+                : null,
         labelText: widget.label,
         labelStyle: Theme.of(context).textTheme.labelMedium,
         floatingLabelStyle: Theme.of(context).textTheme.labelMedium,
         hintText: widget.hint,
         hintStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withAlpha(120),
-            ),
-        suffixIcon: widget.isSecret
-            ? IconButton(
-                focusNode: focusNode,
-                onPressed: () => setState(() => showText = !showText),
-                icon: showText
-                    ? const Icon(Icons.visibility_off)
-                    : const Icon(Icons.visibility),
-              )
-            : widget.trailing,
+          color: Theme.of(context).colorScheme.onSurface.withAlpha(120),
+        ),
+        suffixIcon:
+            widget.isSecret
+                ? IconButton(
+                  focusNode: focusNode,
+                  onPressed: () => setState(() => showText = !showText),
+                  icon:
+                      showText
+                          ? const Icon(Icons.visibility_off)
+                          : const Icon(Icons.visibility),
+                )
+                : widget.trailing,
         prefixIcon: widget.leading,
       ),
       obscureText: widget.isSecret ? !showText : false,
