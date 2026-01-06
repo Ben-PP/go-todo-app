@@ -116,6 +116,12 @@ class _LoginViewState extends ConsumerState<LoginView> {
                 label: 'Username',
                 hint: 'Paroni, Julma-Hurtta, Liisa...',
                 leading: const Icon(Icons.person),
+                autovalidateMode: AutovalidateMode.onUnfocus,
+                validator:
+                    (input) =>
+                        input == null || input.trim().isEmpty
+                            ? 'Username cannot be empty'
+                            : null,
               ),
             ),
             Padding(

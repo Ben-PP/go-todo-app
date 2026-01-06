@@ -135,6 +135,12 @@ class _CreateListRouteState extends ConsumerState<CreateListRoute> {
                       filled: true,
                       label: 'Title',
                       hint: 'Title goes here...',
+                      autovalidateMode: AutovalidateMode.onUnfocus,
+                      validator:
+                          (input) =>
+                              input == null || input.trim().isEmpty
+                                  ? 'Title cannot be empty'
+                                  : null,
                     ),
                   ),
                   Padding(
