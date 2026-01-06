@@ -7,6 +7,7 @@ import '../data/gt_api.dart';
 import '../domain/todo_list.dart';
 import '../src/get_snack_bar.dart';
 import '../src/show_error_snack.dart';
+import '../widgets/gt_loading_button.dart';
 import '../widgets/gt_small_width_container.dart';
 import '../widgets/gt_text_field.dart';
 
@@ -170,9 +171,10 @@ class _EditListRouteState extends ConsumerState<EditListRoute> {
                     padding: const EdgeInsets.symmetric(vertical: 10.0),
                     child: SizedBox(
                       width: double.infinity,
-                      child: ElevatedButton(
+                      child: GtLoadingButton(
                         onPressed: () => _updateList(context),
-                        child: const Text('Update'),
+                        text: 'Update',
+                        isLoading: isLoading,
                       ),
                     ),
                   ),
