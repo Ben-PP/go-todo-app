@@ -18,6 +18,7 @@ class CreateListRoute extends ConsumerStatefulWidget {
 }
 
 class _CreateListRouteState extends ConsumerState<CreateListRoute> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
   var isLoading = false;
@@ -34,7 +35,9 @@ class _CreateListRouteState extends ConsumerState<CreateListRoute> {
     final description = descriptionController.text.trim();
     if (title.isEmpty) {
       final snackBar = getSnackBar(
-          context: context, content: const Text('Title cannot be empty'));
+        context: context,
+        content: const Text('Title cannot be empty'),
+      );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       return;
     }
@@ -43,8 +46,12 @@ class _CreateListRouteState extends ConsumerState<CreateListRoute> {
       isLoading = true;
     });
     try {
-      await ref.read(todoListProvider.notifier).createList(
-          title: title, description: description.isEmpty ? null : description);
+      await ref
+          .read(todoListProvider.notifier)
+          .createList(
+            title: title,
+            description: description.isEmpty ? null : description,
+          );
       if (context.mounted) {
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -57,18 +64,22 @@ class _CreateListRouteState extends ConsumerState<CreateListRoute> {
       }
     } on GtApiException catch (error) {
       if (context.mounted) {
-        showErrorSnack(context, error, map: {
-          GtApiExceptionType.malformedBody:
-              'Something was odd in the request. They say it was malformed.',
-          GtApiExceptionType.unauthorized:
-              'Hey! This action is not for unauthorized users.',
-          GtApiExceptionType.serverError:
-              'The server is having a bad day. Please try again later.',
-          GtApiExceptionType.unknownResponse:
-              'We do not know what the response meant.',
-          GtApiExceptionType.hostNotResponding:
-              'The server is not responding. Please check your connection.',
-        });
+        showErrorSnack(
+          context,
+          error,
+          map: {
+            GtApiExceptionType.malformedBody:
+                'Something was odd in the request. They say it was malformed.',
+            GtApiExceptionType.unauthorized:
+                'Hey! This action is not for unauthorized users.',
+            GtApiExceptionType.serverError:
+                'The server is having a bad day. Please try again later.',
+            GtApiExceptionType.unknownResponse:
+                'We do not know what the response meant.',
+            GtApiExceptionType.hostNotResponding:
+                'The server is not responding. Please check your connection.',
+          },
+        );
       }
     } catch (error) {
       if (context.mounted) {
@@ -77,7 +88,8 @@ class _CreateListRouteState extends ConsumerState<CreateListRoute> {
           getSnackBar(
             context: context,
             content: const Text(
-                'This error was not handled at all. Fix the thrash...'),
+              'This error was not handled at all. Fix the thrash...',
+            ),
             isError: true,
           ),
         );
@@ -109,12 +121,16 @@ class _CreateListRouteState extends ConsumerState<CreateListRoute> {
               ),
             ),
             Form(
+              key: _formKey,
               child: Column(
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10.0),
                     child: GtTextField(
                       controller: titleController,
+                      autofocus: true,
+                      textInputAction: TextInputAction.next,
+                      textCapitalization: TextCapitalization.sentences,
                       maxLength: 40,
                       filled: true,
                       label: 'Title',
@@ -125,6 +141,9 @@ class _CreateListRouteState extends ConsumerState<CreateListRoute> {
                     padding: const EdgeInsets.symmetric(vertical: 10.0),
                     child: GtTextField(
                       controller: descriptionController,
+                      textInputAction: TextInputAction.done,
+                      textCapitalization: TextCapitalization.sentences,
+                      onFieldSubmitted: (_) async => await createList(context),
                       maxLength: 150,
                       filled: true,
                       label: 'Description',
@@ -137,7 +156,7 @@ class _CreateListRouteState extends ConsumerState<CreateListRoute> {
                       width: double.infinity,
                       child: GtLoadingButton(
                         text: 'Create List',
-                        onPressed: () => createList(context),
+                        onPressed: () async => await createList(context),
                       ),
                     ),
                   ),
