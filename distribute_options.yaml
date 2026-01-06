@@ -10,6 +10,7 @@ releases:
           target: apk
           build_args:
             target-platform: android-arm,android-arm64
+            flavor: prod
 
       # Build DEB for Linux
       - name: release-linux-prod

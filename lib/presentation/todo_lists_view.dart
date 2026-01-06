@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_todo/presentation/edit_list_route.dart';
 
 import '../application/todo_list.dart';
 import '../data/gt_api.dart';
@@ -17,6 +16,7 @@ import '../widgets/gt_loading_button.dart';
 import '../widgets/gt_loading_page.dart';
 import './create_list_route.dart';
 import './create_todo_route.dart';
+import './edit_list_route.dart';
 
 class TodoListsView extends ConsumerStatefulWidget {
   const TodoListsView({super.key, this.actions});

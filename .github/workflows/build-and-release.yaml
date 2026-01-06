@@ -31,7 +31,7 @@ jobs:
         run: fastforge release --name prod
       - name: Release
         run: |
-          execFile=$(find . -type f -name 'go_todo*.deb' -o -name 'go_todo*.apk')
+          execFile=$(find . -type f -name 'gotodo*.deb' -o -name 'gotodo*.apk')
           gh release create $tag \
             --repo="$GITHUB_REPOSITORY" \
             --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
