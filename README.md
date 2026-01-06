@@ -11,7 +11,7 @@ Before launching the frontend, make sure you have a backend also running for
 development purposes. To develop this project, first start build_runner.
 
 ```bash
-dart run build_runner watch -d --use-polling-watcher
+dart run build_runner watch -d
 ```
 
 After the build_runner is running, start flutter.
