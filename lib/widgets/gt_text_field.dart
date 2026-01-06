@@ -64,6 +64,9 @@ class _GtTextFieldState extends State<GtTextField> {
       controller: widget.controller,
       textInputAction: widget.textInputAction,
       decoration: InputDecoration(
+        errorBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.error),
+        ),
         border: !widget.filled ? const OutlineInputBorder() : null,
         filled: widget.filled,
         fillColor:
